@@ -2,9 +2,9 @@
 
 Microprocessors and Microcontrollers - Lab 2: Timer Interrupt and LED Scanning.
 
-## Exercise 2
+## Exercise 3
 
-Four common-anode seven-segment displays are multiplexed by TIM2 interrupts to show `12:30`. Each digit is selected for 500 ms, while two DOT LEDs controlled by PA4 toggle every second.
+The four-digit scanning logic is reorganized around `update7SEG(int index)` and a four-element `led_buffer`. TIM2 selects the next display every 500 ms, while the DOT LEDs controlled by PA4 toggle every second.
 
 - TIM2 interrupt period: 10 ms
 - Full scanning period: 2 s
@@ -14,4 +14,4 @@ Four common-anode seven-segment displays are multiplexed by TIM2 interrupts to s
 - Display enables: PA5-PA8 through PNP transistors
 - DOT output: PA4
 
-The `Ex2` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
+The default test buffer is `{1, 2, 3, 4}`. The `Ex3` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
