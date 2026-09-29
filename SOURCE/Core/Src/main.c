@@ -105,12 +105,21 @@ int second = 50;
 volatile int timer0_counter = 0;
 volatile int timer0_flag = 0;
 
+volatile int timer1_counter = 0;
+volatile int timer1_flag = 0;
+
 const int TIMER_CYCLE = 10;
 
 void setTimer0(int duration)
 {
   timer0_counter = duration / TIMER_CYCLE;
   timer0_flag = 0;
+}
+
+void setTimer1(int duration)
+{
+  timer1_counter = duration / TIMER_CYCLE;
+  timer1_flag = 0;
 }
 
 void timer_run(void)
@@ -122,6 +131,16 @@ void timer_run(void)
     if (timer0_counter == 0)
     {
       timer0_flag = 1;
+    }
+  }
+
+  if (timer1_counter > 0)
+  {
+    timer1_counter--;
+
+    if (timer1_counter == 0)
+    {
+      timer1_flag = 1;
     }
   }
 }
@@ -220,7 +239,11 @@ int main(void)
 
   updateClockBuffer();
 
+  /* Timer cập nhật đồng hồ và DOT. */
   setTimer0(1000);
+
+  /* Timer quét LED 7 đoạn. */
+  setTimer1(250);
 
   HAL_TIM_Base_Start_IT(&htim2);
 
@@ -234,12 +257,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+    /* Cập nhật thời gian và DOT mỗi 1000 ms. */
     if (timer0_flag == 1)
     {
-      /* Khởi động lại software timer cho một giây tiếp theo. */
       setTimer0(1000);
 
-      /* DOT được xử lý trong main, không còn trong interrupt. */
       HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 
       second++;
@@ -262,6 +284,19 @@ int main(void)
       }
 
       updateClockBuffer();
+    }
+
+    /* Quét sang LED tiếp theo mỗi 250 ms. */
+    if (timer1_flag == 1)
+    {
+      setTimer1(250);
+
+      update7SEG(index_led++);
+
+      if (index_led >= MAX_LED)
+      {
+        index_led = 0;
+      }
     }
   }
   /* USER CODE END 3 */
@@ -392,27 +427,9 @@ static void MX_GPIO_Init(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-  static int scan_counter = 0;
-
   if (htim->Instance == TIM2)
   {
-    /* Cập nhật software timer mỗi 10 ms. */
     timer_run();
-
-    /* Quét sang LED tiếp theo mỗi 250 ms. */
-    scan_counter++;
-
-    if (scan_counter >= 25)
-    {
-      scan_counter = 0;
-
-      update7SEG(index_led++);
-
-      if (index_led >= MAX_LED)
-      {
-        index_led = 0;
-      }
-    }
   }
 }
 
