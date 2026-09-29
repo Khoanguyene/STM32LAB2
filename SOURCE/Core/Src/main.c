@@ -102,6 +102,30 @@ int hour = 15;
 int minute = 8;
 int second = 50;
 
+volatile int timer0_counter = 0;
+volatile int timer0_flag = 0;
+
+const int TIMER_CYCLE = 10;
+
+void setTimer0(int duration)
+{
+  timer0_counter = duration / TIMER_CYCLE;
+  timer0_flag = 0;
+}
+
+void timer_run(void)
+{
+  if (timer0_counter > 0)
+  {
+    timer0_counter--;
+
+    if (timer0_counter == 0)
+    {
+      timer0_flag = 1;
+    }
+  }
+}
+
 /* Chọn một trong bốn LED và hiển thị dữ liệu
    tương ứng trong led_buffer. */
 void update7SEG(int index)
@@ -194,6 +218,7 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
+  setTimer0(1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -203,6 +228,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    /* Rearm software timer after it expires. */
+    if (timer0_flag == 1)
+    {
+      setTimer0(1000);
+    }
 
     second++;
 
@@ -360,19 +391,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   if (htim->Instance == TIM2)
   {
+    /* Software timer giảm một đơn vị mỗi 10 ms. */
+    timer_run();
+
     scan_counter++;
     dot_counter++;
 
-    /* Hai DOT vẫn đổi trạng thái mỗi 1 giây:
-       100 x 10 ms = 1000 ms. */
     if (dot_counter >= 100)
     {
       dot_counter = 0;
       HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
     }
 
-    /* Mỗi LED được chọn trong 250 ms:
-       25 x 10 ms = 250 ms. */
     if (scan_counter >= 25)
     {
       scan_counter = 0;

@@ -2,9 +2,9 @@
 
 Microprocessors and Microcontrollers - Lab 2: Timer Interrupt and LED Scanning.
 
-## Exercise 5
+## Exercise 6
 
-A digital clock displays hour and minute in `HH:MM` format. The initial time is 15:08:50, `updateClockBuffer()` splits hour and minute into four digits, and the main loop updates time once per second.
+A 10 ms software timer is added to the digital clock. `timer_run()` decrements the counter from the TIM2 callback, and `timer0_flag` signals expiration to the main loop.
 
 - TIM2 interrupt period: 10 ms
 - Full scanning period: 1 s
@@ -14,4 +14,4 @@ A digital clock displays hour and minute in `HH:MM` format. The initial time is 
 - Display enables: PA5-PA8 through PNP transistors
 - DOT output: PA4
 
-TIM2 continues to scan the display at 1 Hz and toggle the DOT LEDs every second. The `Ex5` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
+The Exercise 5 clock behavior and `HAL_Delay(1000)` are retained as required; the software timer prepares the non-blocking implementation in Exercise 7. The `Ex6` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
