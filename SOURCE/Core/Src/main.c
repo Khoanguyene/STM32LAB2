@@ -304,15 +304,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     scan_counter++;
     dot_counter++;
 
-    /* Hai DOT đổi trạng thái mỗi 1 giây. */
+    /* Hai DOT vẫn đổi trạng thái mỗi 1 giây:
+       100 x 10 ms = 1000 ms. */
     if (dot_counter >= 100)
     {
       dot_counter = 0;
       HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
     }
 
-    /* Chuyển LED sau mỗi 500 ms. */
-    if (scan_counter >= 50)
+    /* Mỗi LED được chọn trong 250 ms:
+       25 x 10 ms = 250 ms. */
+    if (scan_counter >= 25)
     {
       scan_counter = 0;
 
