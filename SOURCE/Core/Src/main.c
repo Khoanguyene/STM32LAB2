@@ -217,8 +217,13 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start_IT(&htim2);
+
+  updateClockBuffer();
+
   setTimer0(1000);
+
+  HAL_TIM_Base_Start_IT(&htim2);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -229,34 +234,35 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-    /* Rearm software timer after it expires. */
     if (timer0_flag == 1)
     {
+      /* Khởi động lại software timer cho một giây tiếp theo. */
       setTimer0(1000);
+
+      /* DOT được xử lý trong main, không còn trong interrupt. */
+      HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+
+      second++;
+
+      if (second >= 60)
+      {
+        second = 0;
+        minute++;
+      }
+
+      if (minute >= 60)
+      {
+        minute = 0;
+        hour++;
+      }
+
+      if (hour >= 24)
+      {
+        hour = 0;
+      }
+
+      updateClockBuffer();
     }
-
-    second++;
-
-    if (second >= 60)
-    {
-      second = 0;
-      minute++;
-    }
-
-    if (minute >= 60)
-    {
-      minute = 0;
-      hour++;
-    }
-
-    if (hour >= 24)
-    {
-      hour = 0;
-    }
-
-    updateClockBuffer();
-
-    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
@@ -387,21 +393,14 @@ static void MX_GPIO_Init(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   static int scan_counter = 0;
-  static int dot_counter = 0;
 
   if (htim->Instance == TIM2)
   {
-    /* Software timer giảm một đơn vị mỗi 10 ms. */
+    /* Cập nhật software timer mỗi 10 ms. */
     timer_run();
 
+    /* Quét sang LED tiếp theo mỗi 250 ms. */
     scan_counter++;
-    dot_counter++;
-
-    if (dot_counter >= 100)
-    {
-      dot_counter = 0;
-      HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
-    }
 
     if (scan_counter >= 25)
     {
