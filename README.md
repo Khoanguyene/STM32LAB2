@@ -2,15 +2,16 @@
 
 Microprocessors and Microcontrollers - Lab 2: Timer Interrupt and LED Scanning.
 
-## Exercise 1
+## Exercise 2
 
-Two common-anode seven-segment displays are multiplexed by TIM2 interrupts. The first display shows `1`, the second shows `2`, and the active display changes every 500 ms.
+Four common-anode seven-segment displays are multiplexed by TIM2 interrupts to show `12:30`. Each digit is selected for 500 ms, while two DOT LEDs controlled by PA4 toggle every second.
 
 - TIM2 interrupt period: 10 ms
-- Full scanning period: 1 s
-- Full scanning frequency: 1 Hz
+- Full scanning period: 2 s
+- Full scanning frequency: 0.5 Hz
 - Microcontroller: STM32F103C6
 - Segment outputs: PB0-PB6
-- Display enables: PA5-PA6 through PNP transistors
+- Display enables: PA5-PA8 through PNP transistors
+- DOT output: PA4
 
-The `Ex1` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
+The `Ex2` branch contains the STM32CubeIDE source, Proteus project, and compiled HEX firmware.
