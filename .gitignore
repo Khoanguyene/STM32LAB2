@@ -1,0 +1,17 @@
+# Generated STM32CubeIDE build outputs
+Debug/
+Release/
+.metadata/
+*.o
+*.d
+*.elf
+*.map
+*.list
+
+# Proteus backups and machine-specific workspace
+*.pdsbak
+*.workspace
+
+# OS files
+Thumbs.db
+.DS_Store
