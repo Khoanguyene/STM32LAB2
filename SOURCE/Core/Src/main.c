@@ -57,14 +57,27 @@ static void MX_TIM2_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+/* Mã điều khiển các số 0-9 trên LED 7 đoạn.
+   PB0-PB6 lần lượt tương ứng với A-G. */
 const uint16_t digitPattern[10] =
 {
-  0x3F, 0x06, 0x5B, 0x4F, 0x66,
-  0x6D, 0x7D, 0x07, 0x7F, 0x6F
+  0x3F, /* 0 */
+  0x06, /* 1 */
+  0x5B, /* 2 */
+  0x4F, /* 3 */
+  0x66, /* 4 */
+  0x6D, /* 5 */
+  0x7D, /* 6 */
+  0x07, /* 7 */
+  0x7F, /* 8 */
+  0x6F  /* 9 */
 };
 
+/* Hiển thị một số từ 0 đến 9.
+   LED common anode nên mức LOW làm đoạn sáng. */
 void display7SEG(int num)
 {
+  /* Tắt toàn bộ đoạn trước khi hiển thị số mới. */
   HAL_GPIO_WritePin(GPIOB,
                     SEG0_Pin | SEG1_Pin | SEG2_Pin |
                     SEG3_Pin | SEG4_Pin | SEG5_Pin |
@@ -79,12 +92,21 @@ void display7SEG(int num)
   }
 }
 
+/* Các biến dùng để quét bốn LED 7 đoạn. */
 const int MAX_LED = 4;
 int index_led = 0;
-int led_buffer[4] = {1, 2, 3, 4};
+int led_buffer[4] = {1, 5, 0, 8};
 
+/* Giá trị ban đầu của đồng hồ. */
+int hour = 15;
+int minute = 8;
+int second = 50;
+
+/* Chọn một trong bốn LED và hiển thị dữ liệu
+   tương ứng trong led_buffer. */
 void update7SEG(int index)
 {
+  /* Tắt cả bốn LED trước khi thay đổi dữ liệu đoạn. */
   HAL_GPIO_WritePin(EN0_GPIO_Port, EN0_Pin,
                     GPIO_PIN_SET);
   HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin,
@@ -98,24 +120,28 @@ void update7SEG(int index)
   {
     case 0:
       display7SEG(led_buffer[0]);
+
       HAL_GPIO_WritePin(EN0_GPIO_Port, EN0_Pin,
                         GPIO_PIN_RESET);
       break;
 
     case 1:
       display7SEG(led_buffer[1]);
+
       HAL_GPIO_WritePin(EN1_GPIO_Port, EN1_Pin,
                         GPIO_PIN_RESET);
       break;
 
     case 2:
       display7SEG(led_buffer[2]);
+
       HAL_GPIO_WritePin(EN2_GPIO_Port, EN2_Pin,
                         GPIO_PIN_RESET);
       break;
 
     case 3:
       display7SEG(led_buffer[3]);
+
       HAL_GPIO_WritePin(EN3_GPIO_Port, EN3_Pin,
                         GPIO_PIN_RESET);
       break;
@@ -123,6 +149,16 @@ void update7SEG(int index)
     default:
       break;
   }
+}
+
+/* Chuyển giờ và phút thành bốn chữ số HH:MM. */
+void updateClockBuffer(void)
+{
+  led_buffer[0] = hour / 10;
+  led_buffer[1] = hour % 10;
+
+  led_buffer[2] = minute / 10;
+  led_buffer[3] = minute % 10;
 }
 
 /* USER CODE END 0 */
@@ -167,6 +203,29 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    second++;
+
+    if (second >= 60)
+    {
+      second = 0;
+      minute++;
+    }
+
+    if (minute >= 60)
+    {
+      minute = 0;
+      hour++;
+    }
+
+    if (hour >= 24)
+    {
+      hour = 0;
+    }
+
+    updateClockBuffer();
+
+    HAL_Delay(1000);
   }
   /* USER CODE END 3 */
 }
