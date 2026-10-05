@@ -178,6 +178,10 @@ volatile int timer1_flag = 0;
 volatile int timer2_counter = 0;
 volatile int timer2_flag = 0;
 
+/* Timer 3: cap nhat chuyen dong cua chu tren Matrix. */
+volatile int timer3_counter = 0;
+volatile int timer3_flag = 0;
+
 void setTimer0(int duration)
 {
   timer0_counter = duration / TIMER_CYCLE;
@@ -194,6 +198,12 @@ void setTimer2(int duration)
 {
   timer2_counter = duration / TIMER_CYCLE;
   timer2_flag = 0;
+}
+
+void setTimer3(int duration)
+{
+  timer3_counter = duration / TIMER_CYCLE;
+  timer3_flag = 0;
 }
 
 void timer_run(void)
@@ -227,6 +237,16 @@ void timer_run(void)
       timer2_flag = 1;
     }
   }
+
+  if (timer3_counter > 0)
+  {
+    timer3_counter--;
+
+    if (timer3_counter == 0)
+    {
+      timer3_flag = 1;
+    }
+  }
 }
 
 /* =========================================================
@@ -250,6 +270,50 @@ uint8_t matrix_buffer[8] =
   0x00,
   0x00
 };
+
+/* Chu A va cac cot trong tao thanh mot vung du lieu 16 cot.
+ * Cua so matrix_buffer gom 8 cot se dich dan tren vung nay.
+ */
+const uint8_t matrix_animation[16] =
+{
+  0x00,
+  0x7E,
+  0x11,
+  0x11,
+  0x11,
+  0x7E,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00,
+  0x00
+};
+
+int matrix_offset = 0;
+
+void updateMatrixAnimation(void)
+{
+  int i;
+
+  /* Lay 8 cot lien tiep. Tang offset lam chu dich sang trai. */
+  for (i = 0; i < MAX_LED_MATRIX; i++)
+  {
+    matrix_buffer[i] =
+        matrix_animation[(matrix_offset + i) % 16];
+  }
+
+  matrix_offset++;
+
+  if (matrix_offset >= 16)
+  {
+    matrix_offset = 0;
+  }
+}
 
 void updateLEDMatrix(int index)
 {
@@ -400,6 +464,7 @@ int main(void)
   setTimer0(1000);
   setTimer1(5);
   setTimer2(2);
+  setTimer3(200);
 
   /* Khởi động ngắt Timer 2. */
   HAL_TIM_Base_Start_IT(&htim2);
@@ -475,6 +540,13 @@ int main(void)
 	    {
 	      index_led_matrix = 0;
 	    }
+	  }
+
+	  /* Dich chu A sang trai moi 200 ms. */
+	  if (timer3_flag == 1)
+	  {
+	    setTimer3(200);
+	    updateMatrixAnimation();
 	  }
   }
   /* USER CODE END 3 */
